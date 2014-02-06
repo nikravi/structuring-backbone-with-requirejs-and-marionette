@@ -6,6 +6,7 @@ define(["app", "apps/contacts/list/list_view"], function(ContactManager, View){
           var loadingView = new CommonViews.Loading();
           ContactManager.mainRegion.show(loadingView);
 
+
           var fetchingContacts = ContactManager.request("contact:entities");
 
           var contactsListLayout = new View.Layout();
@@ -48,7 +49,12 @@ define(["app", "apps/contacts/list/list_view"], function(ContactManager, View){
                 contactsListLayout.contactsRegion.show(contactsListView);
               });
 
+              contactsListPanel.on("itemView:contacts:genderChart", function(){
+                ContactManager.trigger("contacts:genderChart");
+              });
+
               contactsListPanel.on("contact:new", function(){
+
                 require(["apps/contacts/new/new_view"], function(NewView){
                   var newContact = ContactManager.request("contact:entity:new");
 

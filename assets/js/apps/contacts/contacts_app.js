@@ -16,7 +16,8 @@ define(["app"], function(ContactManager){
       appRoutes: {
         "contacts(/filter/criterion::criterion)": "listContacts",
         "contacts/:id": "showContact",
-        "contacts/:id/edit": "editContact"
+        "contacts/:id/edit": "editContact",
+        "contactsGenderChart": "contactsGender"
       }
     });
 
@@ -43,6 +44,12 @@ define(["app"], function(ContactManager){
         require(["apps/contacts/edit/edit_controller"], function(EditController){
           executeAction(EditController.editContact, id);
         });
+      },
+
+      contactsGender: function(){
+        require(["apps/contacts/genderChart/genderChart_controller"], function(GenderChartController){
+          executeAction(GenderChartController.displayChart);
+        });
       }
     };
 
@@ -68,6 +75,14 @@ define(["app"], function(ContactManager){
     ContactManager.on("contact:edit", function(id){
       ContactManager.navigate("contacts/" + id + "/edit");
       API.editContact(id);
+    });
+
+
+    ContactManager.on("contacts:genderChart", function(){
+
+      ContactManager.navigate("contactsGenderChart");
+
+      API.contactsGender();
     });
 
     ContactManager.addInitializer(function(){

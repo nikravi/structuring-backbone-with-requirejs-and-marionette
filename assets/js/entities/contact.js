@@ -6,7 +6,8 @@ define(["app", "apps/config/storage/localstorage"], function(ContactManager){
       defaults: {
         firstName: "",
         lastName: "",
-        phoneNumber: ""
+        phoneNumber: "",
+        gender: ""
       },
 
       validate: function(attrs, options) {
@@ -40,9 +41,9 @@ define(["app", "apps/config/storage/localstorage"], function(ContactManager){
 
     var initializeContacts = function(){
       var contacts = new Entities.ContactCollection([
-        { id: 1, firstName: "Alice", lastName: "Arten", phoneNumber: "555-0184" },
-        { id: 2, firstName: "Bob", lastName: "Brigham", phoneNumber: "555-0163" },
-        { id: 3, firstName: "Charlie", lastName: "Campbell", phoneNumber: "555-0129" }
+        { id: 1, firstName: "Alice", lastName: "Arten", phoneNumber: "555-0184", gender: "M" },
+        { id: 2, firstName: "Bob", lastName: "Brigham", phoneNumber: "555-0163", gender: "M" },
+        { id: 3, firstName: "Charlie", lastName: "Campbell", phoneNumber: "555-0129", gender: "F" }
       ]);
       contacts.forEach(function(contact){
         contact.save();
@@ -82,7 +83,7 @@ define(["app", "apps/config/storage/localstorage"], function(ContactManager){
               defer.resolve(undefined);
             }
           });
-        }, 2000);
+        }, 500);
         return defer.promise();
       }
     };
