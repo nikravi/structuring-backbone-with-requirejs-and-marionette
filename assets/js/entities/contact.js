@@ -23,6 +23,11 @@ define(["app", "apps/config/storage/localstorage"], function(ContactManager){
             errors.lastName = "is too short";
           }
         }
+
+        if (! attrs.gender) {
+          errors.gender = "should be set"
+        }
+
         if( ! _.isEmpty(errors)){
           return errors;
         }

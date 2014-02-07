@@ -12,7 +12,7 @@
     <input id="contact-phoneNumber" name="phoneNumber" type="text" value="<%= phoneNumber %>"/>
   </div>
     <div class="control-group">
-        <div class="control-label">Gender:</div>
+        <div class="control-label" id="contact-gender">Gender:</div>
 
         <div class="radio inline">
             <label>

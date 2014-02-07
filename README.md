@@ -1,3 +1,15 @@
+# Building scripts
+
+Have node installed, then run
+
+`node r.js -o assets/js/build.js optimize=none` for development, or
+
+`node r.js -o assets/js/build.js` for deployment.
+
+# Testing
+
+Add new tests into `test/spec`. To see the running tests, open `test/SpecRunner.html`
+
 # Structuring Backbone Code with RequireJS and Marionette Modules
 
 This code repository is the companion to my book on [using RequireJS with Marionette.js](https://leanpub.com/structuring-backbone-with-requirejs-and-marionette).
