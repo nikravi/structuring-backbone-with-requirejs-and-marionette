@@ -28,6 +28,8 @@ describe("Contact Entity", function() {
     });
 
 
+
+
     it("store gender, should store it", function() {
 
       contactGenderOnly.set('gender', 'M');
@@ -50,6 +52,20 @@ describe("Contact Entity", function() {
 
   });
 
+//  it('gender view', function(done){
+//    require(['app', "apps/contacts/common/gender"], function(ContactManager, GView) {
+//      var genderView = GView.GenderView({
+//        model: contactGenderOnly
+//      });
+//
+//      expect(genderView.el).toBe('span');
+//      done();
+//    })
+//  });
+
+//  it("jquery", function(){
+//    expect($('<div>I am an example</div>')).not.toHaveText(/other/);
+//  })
 
 
 });
