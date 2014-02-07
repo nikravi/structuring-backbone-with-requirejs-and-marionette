@@ -1,4 +1,4 @@
-define(["marionette", "apps/config/marionette/regions/dialog"], function(Marionette){
+define(["marionette", "apps/config/marionette/regions/dialog", "svg-support"], function(Marionette){
   var ContactManager = new Marionette.Application();
 
   ContactManager.addRegions({

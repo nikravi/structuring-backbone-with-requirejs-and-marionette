@@ -12,7 +12,9 @@ requirejs.config({
     spin: "vendor/spin",
     "spin.jquery": "vendor/spin.jquery",
     tpl: "vendor/tpl",
-    underscore: "vendor/underscore"
+    underscore: "vendor/underscore",
+    d3: "vendor/d3-3.4.1",
+    "svg-support": "vendor/svg-detect-support"
   },
 
   shim: {

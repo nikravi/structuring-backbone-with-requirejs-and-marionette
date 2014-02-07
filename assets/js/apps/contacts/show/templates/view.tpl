@@ -4,4 +4,4 @@
   Edit this contact
 </a>
 <p><strong>Phone number:</strong> <%= phoneNumber %></p>
-<p><strong>Gender:</strong> <%= gender %></p>
+<p><strong>Gender:</strong> <span class="item-gender-info"></span></p>

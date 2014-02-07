@@ -41,9 +41,9 @@ define(["app", "apps/config/storage/localstorage"], function(ContactManager){
 
     var initializeContacts = function(){
       var contacts = new Entities.ContactCollection([
-        { id: 1, firstName: "Alice", lastName: "Arten", phoneNumber: "555-0184", gender: "M" },
+        { id: 1, firstName: "Alice", lastName: "Arten", phoneNumber: "555-0184", gender: "F" },
         { id: 2, firstName: "Bob", lastName: "Brigham", phoneNumber: "555-0163", gender: "M" },
-        { id: 3, firstName: "Charlie", lastName: "Campbell", phoneNumber: "555-0129", gender: "F" }
+        { id: 3, firstName: "Charlie", lastName: "Campbell", phoneNumber: "555-0129", gender: "M" }
       ]);
       contacts.forEach(function(contact){
         contact.save();

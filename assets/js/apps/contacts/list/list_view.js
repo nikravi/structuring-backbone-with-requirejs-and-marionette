@@ -3,8 +3,10 @@ define(["app",
         "tpl!apps/contacts/list/templates/panel.tpl",
         "tpl!apps/contacts/list/templates/none.tpl",
         "tpl!apps/contacts/list/templates/list.tpl",
-        "tpl!apps/contacts/list/templates/list_item.tpl"],
-       function(ContactManager, layoutTpl, panelTpl, noneTpl, listTpl, listItemTpl){
+        "tpl!apps/contacts/list/templates/list_item.tpl"
+        ],
+       function(ContactManager, layoutTpl, panelTpl, noneTpl, listTpl, listItemTpl, genderView){
+
   ContactManager.module("ContactsApp.List.View", function(View, ContactManager, Backbone, Marionette, $, _){
     View.Layout = Marionette.Layout.extend({
       template: layoutTpl,
@@ -42,9 +44,14 @@ define(["app",
       }
     });
 
-    View.Contact = Marionette.ItemView.extend({
+    View.Contact = Marionette.Layout.extend({
       tagName: "tr",
       template: listItemTpl,
+
+
+      regions: {
+        gender: ".item-gender-region"
+      },
 
       events: {
         "click": "highlightName",

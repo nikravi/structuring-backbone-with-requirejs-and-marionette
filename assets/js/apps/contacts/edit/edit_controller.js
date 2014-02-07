@@ -1,4 +1,9 @@
-define(["app", "apps/contacts/edit/edit_view"], function(ContactManager, View){
+define(["app"
+  , "apps/contacts/edit/edit_view"
+  , "apps/contacts/common/genderChooser"
+
+], function(ContactManager, View, GCView){
+
   ContactManager.module("ContactsApp.Edit", function(Edit, ContactManager, Backbone, Marionette, $, _){
     Edit.Controller = {
       editContact: function(id){
@@ -17,6 +22,14 @@ define(["app", "apps/contacts/edit/edit_view"], function(ContactManager, View){
                 model: contact,
                 generateTitle: true
               });
+
+              view.on('render', function(){
+                var genderChooserView = new GCView.GenderChooserView({
+                  model: contact
+                });
+                view.genderChooser.show(genderChooserView);
+              })
+
 
               view.on("form:submit", function(data){
                 if(contact.save(data)){

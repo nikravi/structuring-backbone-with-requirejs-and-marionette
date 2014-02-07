@@ -5,3 +5,40 @@ body {
 .contacts-container .btn{
     margin: 0 5px 0 0;
 }
+.gender-icon-container {
+    width: 1.5em;
+    height: 1.5em;
+    overflow: hidden;
+    display: block;
+    float: left;
+}
+.svg .gender-icon {
+    background-image: url('../img/gender.svg');
+
+    -webkit-background-size: contain;
+    -o-background-size: contain;
+    -moz-background-size: contain;
+    background-size: contain;
+
+    height: 100%;
+    width: 200%;
+}
+.gender-icon {
+
+    background-image: url('../img/gender.png');
+    background-position: top left;
+    background-repeat: no-repeat;
+
+    display: block;
+    text-indent: -9999px;
+    height: 21px;
+    width: 42px;
+
+    position: relative;
+    left: 0;
+
+}
+
+.gender-woman .gender-icon{
+    left: -100%;
+}

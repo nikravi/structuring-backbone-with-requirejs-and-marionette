@@ -7,8 +7,12 @@ define(["app",
       template: missingTpl
     });
 
-    View.Contact = Marionette.ItemView.extend({
+    View.Contact = Marionette.Layout.extend({
       template: viewTpl,
+
+      regions: {
+        gender: '.item-gender-info'
+      },
 
       events: {
         "click a.js-edit": "editClicked"

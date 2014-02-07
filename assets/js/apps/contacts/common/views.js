@@ -1,11 +1,16 @@
 define(["app", "tpl!apps/contacts/common/templates/form.tpl", "backbone.syphon"],
        function(ContactManager, formTpl){
+
   ContactManager.module("ContactsApp.Common.Views", function(Views, ContactManager, Backbone, Marionette, $, _){
-    Views.Form = Marionette.ItemView.extend({
+    Views.Form = Marionette.Layout.extend({
       template: formTpl,
 
       events: {
         "click button.js-submit": "submitClicked"
+      },
+
+      regions: {
+        genderChooser: '.genderChooser'
       },
 
       submitClicked: function(e){

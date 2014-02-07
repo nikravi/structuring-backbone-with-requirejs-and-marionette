@@ -1,4 +1,10 @@
-define(["app", "apps/contacts/list/list_view"], function(ContactManager, View){
+define(["app"
+  , "apps/contacts/list/list_view"
+  , "apps/contacts/common/gender"
+  , "apps/contacts/common/genderChooser"
+], function(ContactManager, View, GView, GCView){
+
+
   ContactManager.module("ContactsApp.List", function(List, ContactManager, Backbone, Marionette, $, _){
     List.Controller = {
       listContacts: function(criterion){
@@ -39,6 +45,25 @@ define(["app", "apps/contacts/list/list_view"], function(ContactManager, View){
                 collection: filteredContacts
               });
 
+
+              //create the function once, and use it multiple times. Good memory usage.
+              function rebuildIconView(contactItemView){
+                var itemGender = new GView.GenderView({
+                  model: contactItemView.model
+                });
+                contactItemView.gender.show(itemGender);
+              }
+
+              //used when first time added the row on the page
+              contactsListView.on('after:item:added', function(contactItemView){
+
+                rebuildIconView(contactItemView);
+
+                //used when editing the contact from the list page.
+                contactItemView.on('item:rendered', rebuildIconView);
+
+              });
+
               contactsListPanel.on("contacts:filter", function(filterCriterion){
                 filteredContacts.filter(filterCriterion);
                 ContactManager.trigger("contacts:filter", filterCriterion);
@@ -61,6 +86,13 @@ define(["app", "apps/contacts/list/list_view"], function(ContactManager, View){
                   var view = new NewView.Contact({
                     model: newContact
                   });
+
+                  view.on('render', function(){
+                    var genderChooserView = new GCView.GenderChooserView({
+                      model: newContact
+                    });
+                    view.genderChooser.show(genderChooserView);
+                  })
 
                   view.on("form:submit", function(data){
                     if(contacts.length > 0){
@@ -99,8 +131,16 @@ define(["app", "apps/contacts/list/list_view"], function(ContactManager, View){
                     model: model
                   });
 
+                  view.on('render', function(){
+                    var genderChooserView = new GCView.GenderChooserView({
+                      model: model
+                    });
+                    view.genderChooser.show(genderChooserView);
+                  })
+
                   view.on("form:submit", function(data){
                     if(model.save(data)){
+                      //trigger contact item view render. We listen for this event, to rebuild the gender icon
                       childView.render();
                       view.trigger("dialog:close");
                       childView.flash("success");

@@ -1,4 +1,8 @@
-define(["app", "apps/contacts/show/show_view"], function(ContactManager, View){
+define(["app"
+  , "apps/contacts/show/show_view"
+  , "apps/contacts/common/gender"
+], function(ContactManager, View, GView){
+
   ContactManager.module("ContactsApp.Show", function(Show, ContactManager, Backbone, Marionette, $, _){
     Show.Controller = {
       showContact: function(id){
@@ -16,6 +20,13 @@ define(["app", "apps/contacts/show/show_view"], function(ContactManager, View){
               contactView = new View.Contact({
                 model: contact
               });
+
+
+              contactView.on('render', function(){
+                contactView.gender.show( new GView.GenderView({
+                  model: contact
+                }) );
+              })
 
               contactView.on("contact:edit", function(contact){
                 ContactManager.trigger("contact:edit", contact.get("id"));

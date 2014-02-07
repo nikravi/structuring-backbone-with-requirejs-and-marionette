@@ -1,5 +1,6 @@
 <td><%= firstName %></td>
 <td><%= lastName %></td>
+<td class="item-gender-region"></td>
 <td>
   <a href="#contacts/<%= id %>" class="btn btn-small js-show">
     <i class="icon-eye-open"></i>
