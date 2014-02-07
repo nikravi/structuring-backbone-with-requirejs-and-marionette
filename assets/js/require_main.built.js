@@ -31321,414 +31321,6 @@ define('apps/contacts/common/gender',["app", "tpl!apps/contacts/common/templates
     return ContactManager.ContactsApp.Common.Views;
 });
 
-define('tpl!apps/contacts/common/templates/genderChooser.tpl', function() {return function(obj) { var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<div class="control-label">Gender:</div><div class="radio inline">    <label>        <input type="radio" name="gender" id="genderM" value="M" ', gender === 'M' ? "checked" : "" ,'>        <span class="gender-first"></span>    </label></div><div class="radio inline">    <label>        <input type="radio" name="gender" id="genderF" value="F" ', gender === 'F' ? "checked" : "" ,' >        <span class="gender-second"></span>    </label></div>');}return __p.join('');}});
-
-/**
- * Backbone localStorage Adapter
- * Version 1.1.7
- *
- * https://github.com/jeromegn/Backbone.localStorage
- */
-(function (root, factory) {
-   if (typeof exports === 'object' && typeof require === 'function') {
-     module.exports = factory(require("underscore"), require("backbone"));
-   } else if (typeof define === "function" && define.amd) {
-      // AMD. Register as an anonymous module.
-      define('localstorage',["underscore","backbone"], function(_, Backbone) {
-        // Use global variables if the locals are undefined.
-        return factory(_ || root._, Backbone || root.Backbone);
-      });
-   } else {
-      // RequireJS isn't being used. Assume underscore and backbone are loaded in <script> tags
-      factory(_, Backbone);
-   }
-}(this, function(_, Backbone) {
-// A simple module to replace `Backbone.sync` with *localStorage*-based
-// persistence. Models are given GUIDS, and saved into a JSON object. Simple
-// as that.
-
-// Hold reference to Underscore.js and Backbone.js in the closure in order
-// to make things work even if they are removed from the global namespace
-
-// Generate four random hex digits.
-function S4() {
-   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
-};
-
-// Generate a pseudo-GUID by concatenating random hexadecimal.
-function guid() {
-   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
-};
-
-// Our Store is represented by a single JS object in *localStorage*. Create it
-// with a meaningful name, like the name you'd give a table.
-// window.Store is deprectated, use Backbone.LocalStorage instead
-Backbone.LocalStorage = window.Store = function(name) {
-  if( !this.localStorage ) {
-    throw "Backbone.localStorage: Environment does not support localStorage."
-  }
-  this.name = name;
-  var store = this.localStorage().getItem(this.name);
-  this.records = (store && store.split(",")) || [];
-};
-
-_.extend(Backbone.LocalStorage.prototype, {
-
-  // Save the current state of the **Store** to *localStorage*.
-  save: function() {
-    this.localStorage().setItem(this.name, this.records.join(","));
-  },
-
-  // Add a model, giving it a (hopefully)-unique GUID, if it doesn't already
-  // have an id of it's own.
-  create: function(model) {
-    if (!model.id) {
-      model.id = guid();
-      model.set(model.idAttribute, model.id);
-    }
-    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
-    this.records.push(model.id.toString());
-    this.save();
-    return this.find(model);
-  },
-
-  // Update a model by replacing its copy in `this.data`.
-  update: function(model) {
-    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
-    if (!_.include(this.records, model.id.toString()))
-      this.records.push(model.id.toString()); this.save();
-    return this.find(model);
-  },
-
-  // Retrieve a model from `this.data` by id.
-  find: function(model) {
-    return this.jsonData(this.localStorage().getItem(this.name+"-"+model.id));
-  },
-
-  // Return the array of all models currently in storage.
-  findAll: function() {
-    // Lodash removed _#chain in v1.0.0-rc.1
-    return (_.chain || _)(this.records)
-      .map(function(id){
-        return this.jsonData(this.localStorage().getItem(this.name+"-"+id));
-      }, this)
-      .compact()
-      .value();
-  },
-
-  // Delete a model from `this.data`, returning it.
-  destroy: function(model) {
-    if (model.isNew())
-      return false
-    this.localStorage().removeItem(this.name+"-"+model.id);
-    this.records = _.reject(this.records, function(id){
-      return id === model.id.toString();
-    });
-    this.save();
-    return model;
-  },
-
-  localStorage: function() {
-    return localStorage;
-  },
-
-  // fix for "illegal access" error on Android when JSON.parse is passed null
-  jsonData: function (data) {
-      return data && JSON.parse(data);
-  },
-
-  // Clear localStorage for specific collection.
-  _clear: function() {
-    var local = this.localStorage(),
-      itemRe = new RegExp("^" + this.name + "-");
-
-    // Remove id-tracking item (e.g., "foo").
-    local.removeItem(this.name);
-
-    // Lodash removed _#chain in v1.0.0-rc.1
-    // Match all data items (e.g., "foo-ID") and remove.
-    (_.chain || _)(local).keys()
-      .filter(function (k) { return itemRe.test(k); })
-      .each(function (k) { local.removeItem(k); });
-
-    this.records.length = 0;
-  },
-
-  // Size of localStorage.
-  _storageSize: function() {
-    return this.localStorage().length;
-  }
-
-});
-
-// localSync delegate to the model or collection's
-// *localStorage* property, which should be an instance of `Store`.
-// window.Store.sync and Backbone.localSync is deprecated, use Backbone.LocalStorage.sync instead
-Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(method, model, options) {
-  var store = model.localStorage || model.collection.localStorage;
-
-  var resp, errorMessage, syncDfd = Backbone.$.Deferred && Backbone.$.Deferred(); //If $ is having Deferred - use it.
-
-  try {
-
-    switch (method) {
-      case "read":
-        resp = model.id != undefined ? store.find(model) : store.findAll();
-        break;
-      case "create":
-        resp = store.create(model);
-        break;
-      case "update":
-        resp = store.update(model);
-        break;
-      case "delete":
-        resp = store.destroy(model);
-        break;
-    }
-
-  } catch(error) {
-    if (error.code === 22 && store._storageSize() === 0)
-      errorMessage = "Private browsing is unsupported";
-    else
-      errorMessage = error.message;
-  }
-
-  if (resp) {
-    if (options && options.success) {
-      if (Backbone.VERSION === "0.9.10") {
-        options.success(model, resp, options);
-      } else {
-        options.success(resp);
-      }
-    }
-    if (syncDfd) {
-      syncDfd.resolve(resp);
-    }
-
-  } else {
-    errorMessage = errorMessage ? errorMessage
-                                : "Record Not Found";
-
-    if (options && options.error)
-      if (Backbone.VERSION === "0.9.10") {
-        options.error(model, errorMessage, options);
-      } else {
-        options.error(errorMessage);
-      }
-
-    if (syncDfd)
-      syncDfd.reject(errorMessage);
-  }
-
-  // add compatibility with $.ajax
-  // always execute callback for success and error
-  if (options && options.complete) options.complete(resp);
-
-  return syncDfd && syncDfd.promise();
-};
-
-Backbone.ajaxSync = Backbone.sync;
-
-Backbone.getSyncMethod = function(model) {
-  if(model.localStorage || (model.collection && model.collection.localStorage)) {
-    return Backbone.localSync;
-  }
-
-  return Backbone.ajaxSync;
-};
-
-// Override 'Backbone.sync' to default to localSync,
-// the original 'Backbone.sync' is still available in 'Backbone.ajaxSync'
-Backbone.sync = function(method, model, options) {
-  return Backbone.getSyncMethod(model).apply(this, [method, model, options]);
-};
-
-return Backbone.LocalStorage;
-}));
-
-define('apps/config/storage/localstorage',["app", "localstorage"], function(ContactManager){
-  ContactManager.module("Entities", function(Entities, ContactManager, Backbone, Marionette, $, _){
-    var findStorageKey = function(entity){
-      // use a model's urlRoot value
-      if(entity.urlRoot){
-        return _.result(entity, "urlRoot");
-      }
-      // use a collection's url value
-      if(entity.url){
-        return _.result(entity, "url");
-      }
-      // fallback to obtaining a model's storage key from
-      // the collection it belongs to
-      if(entity.collection && entity.collection.url){
-        return _.result(entity.collection, "url");
-      }
-
-      throw new Error("Unable to determine storage key");
-    };
-
-    var StorageMixin = function(entityPrototype){
-      var storageKey = findStorageKey(entityPrototype);
-      return { localStorage: new Backbone.LocalStorage(storageKey) };
-    };
-
-    Entities.configureStorage = function(entity){
-      _.extend(entity.prototype, new StorageMixin(entity.prototype));
-    };
-  });
-
-  return ContactManager.Entities.configureStorage;
-});
-
-define('entities/contact',["app", "apps/config/storage/localstorage"], function(ContactManager){
-  ContactManager.module("Entities", function(Entities, ContactManager, Backbone, Marionette, $, _){
-    Entities.Contact = Backbone.Model.extend({
-      urlRoot: "contacts",
-
-      defaults: {
-        firstName: "",
-        lastName: "",
-        phoneNumber: "",
-        gender: ""
-      },
-
-      validate: function(attrs, options) {
-        var errors = {}
-        if (! attrs.firstName) {
-          errors.firstName = "can't be blank";
-        }
-        if (! attrs.lastName) {
-          errors.lastName = "can't be blank";
-        }
-        else{
-          if (attrs.lastName.length < 2) {
-            errors.lastName = "is too short";
-          }
-        }
-        if( ! _.isEmpty(errors)){
-          return errors;
-        }
-      }
-    });
-
-    Entities.configureStorage(Entities.Contact);
-
-    Entities.ContactCollection = Backbone.Collection.extend({
-      url: "contacts",
-      model: Entities.Contact,
-      comparator: "firstName"
-    });
-
-    Entities.configureStorage(Entities.ContactCollection);
-
-    var initializeContacts = function(){
-      var contacts = new Entities.ContactCollection([
-        { id: 1, firstName: "Alice", lastName: "Arten", phoneNumber: "555-0184", gender: "F" },
-        { id: 2, firstName: "Bob", lastName: "Brigham", phoneNumber: "555-0163", gender: "M" },
-        { id: 3, firstName: "Charlie", lastName: "Campbell", phoneNumber: "555-0129", gender: "M" }
-      ]);
-      contacts.forEach(function(contact){
-        contact.save();
-      });
-      return contacts.models;
-    };
-
-    var API = {
-      getContactEntities: function(){
-        var contacts = new Entities.ContactCollection();
-        var defer = $.Deferred();
-        contacts.fetch({
-          success: function(data){
-            defer.resolve(data);
-          }
-        });
-        var promise = defer.promise();
-        $.when(promise).done(function(contacts){
-          if(contacts.length === 0){
-            // if we don't have any contacts yet, create some for convenience
-            var models = initializeContacts();
-            contacts.reset(models);
-          }
-        });
-        return promise;
-      },
-
-      getContactEntity: function(contactId){
-        var contact = new Entities.Contact({id: contactId});
-        var defer = $.Deferred();
-        setTimeout(function(){
-          contact.fetch({
-            success: function(data){
-              defer.resolve(data);
-            },
-            error: function(data){
-              defer.resolve(undefined);
-            }
-          });
-        }, 500);
-        return defer.promise();
-      }
-    };
-
-    ContactManager.reqres.setHandler("contact:entities", function(){
-      return API.getContactEntities();
-    });
-
-    ContactManager.reqres.setHandler("contact:entity", function(id){
-      return API.getContactEntity(id);
-    });
-
-    ContactManager.reqres.setHandler("contact:entity:new", function(id){
-      return new Entities.Contact();
-    });
-  });
-
-  return ;
-});
-
-define('apps/contacts/common/genderChooser',["app"
-  , "tpl!apps/contacts/common/templates/genderChooser.tpl"
-  , "apps/contacts/common/gender"
-  , "entities/contact"
-
-],
-
-  function(ContactManager, genderTpl, GView){
-
-  ContactManager.module("ContactsApp.Common.Views", function(Views, ContactManager, Backbone, Marionette, $, _){
-
-    Views.GenderChooserView = Marionette.Layout.extend({
-      template: genderTpl
-
-      , regions: {
-        genderFirst: ".gender-first",
-        genderSecond: ".gender-second"
-      }
-
-      , onShowCalled: function() {
-
-
-        var manGenderView = new GView.GenderView({
-            model: new ContactManager.Entities.Contact({
-              gender: "M"
-            })
-          })
-          , womanGenderView = new GView.GenderView({
-            model: new ContactManager.Entities.Contact({
-              gender: "F"
-            })
-          })
-          ;
-
-        this.genderFirst.show(manGenderView);
-        this.genderSecond.show(womanGenderView);
-
-      }
-    });
-  });
-
-    return ContactManager.ContactsApp.Common.Views;
-});
-
 define('tpl!common/templates/loading.tpl', function() {return function(obj) { var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<h1>', title ,'</h1><p>', message ,'</p><div id="spinner"></div>');}return __p.join('');}});
 
 //fgnass.github.com/spin.js#v1.3
@@ -32207,6 +31799,368 @@ define('common/views',["app", "tpl!common/templates/loading.tpl", "spin.jquery"]
   return ContactManager.Common.Views;
 });
 
+/**
+ * Backbone localStorage Adapter
+ * Version 1.1.7
+ *
+ * https://github.com/jeromegn/Backbone.localStorage
+ */
+(function (root, factory) {
+   if (typeof exports === 'object' && typeof require === 'function') {
+     module.exports = factory(require("underscore"), require("backbone"));
+   } else if (typeof define === "function" && define.amd) {
+      // AMD. Register as an anonymous module.
+      define('localstorage',["underscore","backbone"], function(_, Backbone) {
+        // Use global variables if the locals are undefined.
+        return factory(_ || root._, Backbone || root.Backbone);
+      });
+   } else {
+      // RequireJS isn't being used. Assume underscore and backbone are loaded in <script> tags
+      factory(_, Backbone);
+   }
+}(this, function(_, Backbone) {
+// A simple module to replace `Backbone.sync` with *localStorage*-based
+// persistence. Models are given GUIDS, and saved into a JSON object. Simple
+// as that.
+
+// Hold reference to Underscore.js and Backbone.js in the closure in order
+// to make things work even if they are removed from the global namespace
+
+// Generate four random hex digits.
+function S4() {
+   return (((1+Math.random())*0x10000)|0).toString(16).substring(1);
+};
+
+// Generate a pseudo-GUID by concatenating random hexadecimal.
+function guid() {
+   return (S4()+S4()+"-"+S4()+"-"+S4()+"-"+S4()+"-"+S4()+S4()+S4());
+};
+
+// Our Store is represented by a single JS object in *localStorage*. Create it
+// with a meaningful name, like the name you'd give a table.
+// window.Store is deprectated, use Backbone.LocalStorage instead
+Backbone.LocalStorage = window.Store = function(name) {
+  if( !this.localStorage ) {
+    throw "Backbone.localStorage: Environment does not support localStorage."
+  }
+  this.name = name;
+  var store = this.localStorage().getItem(this.name);
+  this.records = (store && store.split(",")) || [];
+};
+
+_.extend(Backbone.LocalStorage.prototype, {
+
+  // Save the current state of the **Store** to *localStorage*.
+  save: function() {
+    this.localStorage().setItem(this.name, this.records.join(","));
+  },
+
+  // Add a model, giving it a (hopefully)-unique GUID, if it doesn't already
+  // have an id of it's own.
+  create: function(model) {
+    if (!model.id) {
+      model.id = guid();
+      model.set(model.idAttribute, model.id);
+    }
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    this.records.push(model.id.toString());
+    this.save();
+    return this.find(model);
+  },
+
+  // Update a model by replacing its copy in `this.data`.
+  update: function(model) {
+    this.localStorage().setItem(this.name+"-"+model.id, JSON.stringify(model));
+    if (!_.include(this.records, model.id.toString()))
+      this.records.push(model.id.toString()); this.save();
+    return this.find(model);
+  },
+
+  // Retrieve a model from `this.data` by id.
+  find: function(model) {
+    return this.jsonData(this.localStorage().getItem(this.name+"-"+model.id));
+  },
+
+  // Return the array of all models currently in storage.
+  findAll: function() {
+    // Lodash removed _#chain in v1.0.0-rc.1
+    return (_.chain || _)(this.records)
+      .map(function(id){
+        return this.jsonData(this.localStorage().getItem(this.name+"-"+id));
+      }, this)
+      .compact()
+      .value();
+  },
+
+  // Delete a model from `this.data`, returning it.
+  destroy: function(model) {
+    if (model.isNew())
+      return false
+    this.localStorage().removeItem(this.name+"-"+model.id);
+    this.records = _.reject(this.records, function(id){
+      return id === model.id.toString();
+    });
+    this.save();
+    return model;
+  },
+
+  localStorage: function() {
+    return localStorage;
+  },
+
+  // fix for "illegal access" error on Android when JSON.parse is passed null
+  jsonData: function (data) {
+      return data && JSON.parse(data);
+  },
+
+  // Clear localStorage for specific collection.
+  _clear: function() {
+    var local = this.localStorage(),
+      itemRe = new RegExp("^" + this.name + "-");
+
+    // Remove id-tracking item (e.g., "foo").
+    local.removeItem(this.name);
+
+    // Lodash removed _#chain in v1.0.0-rc.1
+    // Match all data items (e.g., "foo-ID") and remove.
+    (_.chain || _)(local).keys()
+      .filter(function (k) { return itemRe.test(k); })
+      .each(function (k) { local.removeItem(k); });
+
+    this.records.length = 0;
+  },
+
+  // Size of localStorage.
+  _storageSize: function() {
+    return this.localStorage().length;
+  }
+
+});
+
+// localSync delegate to the model or collection's
+// *localStorage* property, which should be an instance of `Store`.
+// window.Store.sync and Backbone.localSync is deprecated, use Backbone.LocalStorage.sync instead
+Backbone.LocalStorage.sync = window.Store.sync = Backbone.localSync = function(method, model, options) {
+  var store = model.localStorage || model.collection.localStorage;
+
+  var resp, errorMessage, syncDfd = Backbone.$.Deferred && Backbone.$.Deferred(); //If $ is having Deferred - use it.
+
+  try {
+
+    switch (method) {
+      case "read":
+        resp = model.id != undefined ? store.find(model) : store.findAll();
+        break;
+      case "create":
+        resp = store.create(model);
+        break;
+      case "update":
+        resp = store.update(model);
+        break;
+      case "delete":
+        resp = store.destroy(model);
+        break;
+    }
+
+  } catch(error) {
+    if (error.code === 22 && store._storageSize() === 0)
+      errorMessage = "Private browsing is unsupported";
+    else
+      errorMessage = error.message;
+  }
+
+  if (resp) {
+    if (options && options.success) {
+      if (Backbone.VERSION === "0.9.10") {
+        options.success(model, resp, options);
+      } else {
+        options.success(resp);
+      }
+    }
+    if (syncDfd) {
+      syncDfd.resolve(resp);
+    }
+
+  } else {
+    errorMessage = errorMessage ? errorMessage
+                                : "Record Not Found";
+
+    if (options && options.error)
+      if (Backbone.VERSION === "0.9.10") {
+        options.error(model, errorMessage, options);
+      } else {
+        options.error(errorMessage);
+      }
+
+    if (syncDfd)
+      syncDfd.reject(errorMessage);
+  }
+
+  // add compatibility with $.ajax
+  // always execute callback for success and error
+  if (options && options.complete) options.complete(resp);
+
+  return syncDfd && syncDfd.promise();
+};
+
+Backbone.ajaxSync = Backbone.sync;
+
+Backbone.getSyncMethod = function(model) {
+  if(model.localStorage || (model.collection && model.collection.localStorage)) {
+    return Backbone.localSync;
+  }
+
+  return Backbone.ajaxSync;
+};
+
+// Override 'Backbone.sync' to default to localSync,
+// the original 'Backbone.sync' is still available in 'Backbone.ajaxSync'
+Backbone.sync = function(method, model, options) {
+  return Backbone.getSyncMethod(model).apply(this, [method, model, options]);
+};
+
+return Backbone.LocalStorage;
+}));
+
+define('apps/config/storage/localstorage',["app", "localstorage"], function(ContactManager){
+  ContactManager.module("Entities", function(Entities, ContactManager, Backbone, Marionette, $, _){
+    var findStorageKey = function(entity){
+      // use a model's urlRoot value
+      if(entity.urlRoot){
+        return _.result(entity, "urlRoot");
+      }
+      // use a collection's url value
+      if(entity.url){
+        return _.result(entity, "url");
+      }
+      // fallback to obtaining a model's storage key from
+      // the collection it belongs to
+      if(entity.collection && entity.collection.url){
+        return _.result(entity.collection, "url");
+      }
+
+      throw new Error("Unable to determine storage key");
+    };
+
+    var StorageMixin = function(entityPrototype){
+      var storageKey = findStorageKey(entityPrototype);
+      return { localStorage: new Backbone.LocalStorage(storageKey) };
+    };
+
+    Entities.configureStorage = function(entity){
+      _.extend(entity.prototype, new StorageMixin(entity.prototype));
+    };
+  });
+
+  return ContactManager.Entities.configureStorage;
+});
+
+define('entities/contact',["app", "apps/config/storage/localstorage"], function(ContactManager){
+  ContactManager.module("Entities", function(Entities, ContactManager, Backbone, Marionette, $, _){
+    Entities.Contact = Backbone.Model.extend({
+      urlRoot: "contacts",
+
+      defaults: {
+        firstName: "",
+        lastName: "",
+        phoneNumber: "",
+        gender: ""
+      },
+
+      validate: function(attrs, options) {
+        var errors = {}
+        if (! attrs.firstName) {
+          errors.firstName = "can't be blank";
+        }
+        if (! attrs.lastName) {
+          errors.lastName = "can't be blank";
+        }
+        else{
+          if (attrs.lastName.length < 2) {
+            errors.lastName = "is too short";
+          }
+        }
+        if( ! _.isEmpty(errors)){
+          return errors;
+        }
+      }
+    });
+
+    Entities.configureStorage(Entities.Contact);
+
+    Entities.ContactCollection = Backbone.Collection.extend({
+      url: "contacts",
+      model: Entities.Contact,
+      comparator: "firstName"
+    });
+
+    Entities.configureStorage(Entities.ContactCollection);
+
+    var initializeContacts = function(){
+      var contacts = new Entities.ContactCollection([
+        { id: 1, firstName: "Alice", lastName: "Arten", phoneNumber: "555-0184", gender: "F" },
+        { id: 2, firstName: "Bob", lastName: "Brigham", phoneNumber: "555-0163", gender: "M" },
+        { id: 3, firstName: "Charlie", lastName: "Campbell", phoneNumber: "555-0129", gender: "M" }
+      ]);
+      contacts.forEach(function(contact){
+        contact.save();
+      });
+      return contacts.models;
+    };
+
+    var API = {
+      getContactEntities: function(){
+        var contacts = new Entities.ContactCollection();
+        var defer = $.Deferred();
+        contacts.fetch({
+          success: function(data){
+            defer.resolve(data);
+          }
+        });
+        var promise = defer.promise();
+        $.when(promise).done(function(contacts){
+          if(contacts.length === 0){
+            // if we don't have any contacts yet, create some for convenience
+            var models = initializeContacts();
+            contacts.reset(models);
+          }
+        });
+        return promise;
+      },
+
+      getContactEntity: function(contactId){
+        var contact = new Entities.Contact({id: contactId});
+        var defer = $.Deferred();
+        setTimeout(function(){
+          contact.fetch({
+            success: function(data){
+              defer.resolve(data);
+            },
+            error: function(data){
+              defer.resolve(undefined);
+            }
+          });
+        }, 500);
+        return defer.promise();
+      }
+    };
+
+    ContactManager.reqres.setHandler("contact:entities", function(){
+      return API.getContactEntities();
+    });
+
+    ContactManager.reqres.setHandler("contact:entity", function(id){
+      return API.getContactEntity(id);
+    });
+
+    ContactManager.reqres.setHandler("contact:entity:new", function(id){
+      return new Entities.Contact();
+    });
+  });
+
+  return ;
+});
+
 define('entities/common',["app"], function(ContactManager){
   ContactManager.module("Entities", function(Entities, ContactManager, Backbone, Marionette, $, _){
     Entities.FilteredCollection = function(options){
@@ -32295,7 +32249,7 @@ define('entities/common',["app"], function(ContactManager){
   return ContactManager.Entities.FilteredCollection;
 });
 
-define('tpl!apps/contacts/common/templates/form.tpl', function() {return function(obj) { var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<form>  <div class="control-group">    <label for="contact-firstName" class="control-label">First name:</label>    <input id="contact-firstName" name="firstName" type="text" value="', firstName ,'"/>  </div>  <div class="control-group">    <label for="contact-lastName" class="control-label">Last name:</label>    <input id="contact-lastName" name="lastName" type="text" value="', lastName ,'"/>  </div>  <div class="control-group">    <label for="contact-phoneNumber" class="control-label">Phone number:</label>    <input id="contact-phoneNumber" name="phoneNumber" type="text" value="', phoneNumber ,'"/>  </div>    <div class="control-group genderChooser">    </div>  <button class="btn js-submit">Save</button></form>');}return __p.join('');}});
+define('tpl!apps/contacts/common/templates/form.tpl', function() {return function(obj) { var __p=[],print=function(){__p.push.apply(__p,arguments);};with(obj||{}){__p.push('<form>  <div class="control-group">    <label for="contact-firstName" class="control-label">First name:</label>    <input id="contact-firstName" name="firstName" type="text" value="', firstName ,'"/>  </div>  <div class="control-group">    <label for="contact-lastName" class="control-label">Last name:</label>    <input id="contact-lastName" name="lastName" type="text" value="', lastName ,'"/>  </div>  <div class="control-group">    <label for="contact-phoneNumber" class="control-label">Phone number:</label>    <input id="contact-phoneNumber" name="phoneNumber" type="text" value="', phoneNumber ,'"/>  </div>    <div class="control-group">        <div class="control-label">Gender:</div>        <div class="radio inline">            <label>                <input type="radio" name="gender" id="genderM" value="M" ', gender === 'M' ? "checked" : "" ,'>                <span class="gender-first"></span>            </label>        </div>        <div class="radio inline">            <label>                <input type="radio" name="gender" id="genderF" value="F" ', gender === 'F' ? "checked" : "" ,' >                <span class="gender-second"></span>            </label>        </div>    </div>  <button class="btn js-submit">Save</button></form>');}return __p.join('');}});
 
 // Backbone.Syphon, v0.4.1
 // Copyright (c)2012 Derick Bailey, Muted Solutions, LLC.
@@ -32769,8 +32723,13 @@ Backbone.Syphon.KeyJoiner = function(parentKey, childKey){
 ;
 define("backbone.syphon", function(){});
 
-define('apps/contacts/common/views',["app", "tpl!apps/contacts/common/templates/form.tpl", "backbone.syphon"],
-       function(ContactManager, formTpl){
+define('apps/contacts/common/views',["app"
+  , "tpl!apps/contacts/common/templates/form.tpl"
+  , "apps/contacts/common/gender"
+  , "entities/contact"
+  , "backbone.syphon"
+],
+       function(ContactManager, formTpl, GView){
 
   ContactManager.module("ContactsApp.Common.Views", function(Views, ContactManager, Backbone, Marionette, $, _){
     Views.Form = Marionette.Layout.extend({
@@ -32781,7 +32740,27 @@ define('apps/contacts/common/views',["app", "tpl!apps/contacts/common/templates/
       },
 
       regions: {
-        genderChooser: '.genderChooser'
+        genderFirst: ".gender-first",
+        genderSecond: ".gender-second"
+      },
+
+      onShowCalled: function() {
+
+        var manGenderView = new GView.GenderView({
+            model: new ContactManager.Entities.Contact({
+              gender: "M"
+            })
+          })
+          , womanGenderView = new GView.GenderView({
+            model: new ContactManager.Entities.Contact({
+              gender: "F"
+            })
+          })
+          ;
+
+        this.genderFirst.show(manGenderView);
+        this.genderSecond.show(womanGenderView);
+
       },
 
       submitClicked: function(e){
@@ -32856,8 +32835,7 @@ define('apps/contacts/edit/edit_view',["app", "apps/contacts/common/views"], fun
 define('apps/contacts/list/list_controller',["app"
   , "apps/contacts/list/list_view"
   , "apps/contacts/common/gender"
-  , "apps/contacts/common/genderChooser"
-], function(ContactManager, View, GView, GCView){
+], function(ContactManager, View, GView){
 
 
   ContactManager.module("ContactsApp.List", function(List, ContactManager, Backbone, Marionette, $, _){
@@ -32942,13 +32920,6 @@ define('apps/contacts/list/list_controller',["app"
                     model: newContact
                   });
 
-                  view.on('render', function(){
-                    var genderChooserView = new GCView.GenderChooserView({
-                      model: newContact
-                    });
-                    view.genderChooser.show(genderChooserView);
-                  })
-
                   view.on("form:submit", function(data){
                     if(contacts.length > 0){
                       var highestId = contacts.max(function(c){ return c.id; }).get("id");
@@ -32986,12 +32957,6 @@ define('apps/contacts/list/list_controller',["app"
                     model: model
                   });
 
-                  view.on('render', function(){
-                    var genderChooserView = new GCView.GenderChooserView({
-                      model: model
-                    });
-                    view.genderChooser.show(genderChooserView);
-                  })
 
                   view.on("form:submit", function(data){
                     if(model.save(data)){
@@ -33108,9 +33073,8 @@ define('apps/contacts/show/show_controller',["app"
 
 define('apps/contacts/edit/edit_controller',["app"
   , "apps/contacts/edit/edit_view"
-  , "apps/contacts/common/genderChooser"
 
-], function(ContactManager, View, GCView){
+], function(ContactManager, View){
 
   ContactManager.module("ContactsApp.Edit", function(Edit, ContactManager, Backbone, Marionette, $, _){
     Edit.Controller = {
@@ -33130,13 +33094,6 @@ define('apps/contacts/edit/edit_controller',["app"
                 model: contact,
                 generateTitle: true
               });
-
-              view.on('render', function(){
-                var genderChooserView = new GCView.GenderChooserView({
-                  model: contact
-                });
-                view.genderChooser.show(genderChooserView);
-              })
 
 
               view.on("form:submit", function(data){

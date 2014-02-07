@@ -1,8 +1,7 @@
 define(["app"
   , "apps/contacts/list/list_view"
   , "apps/contacts/common/gender"
-  , "apps/contacts/common/genderChooser"
-], function(ContactManager, View, GView, GCView){
+], function(ContactManager, View, GView){
 
 
   ContactManager.module("ContactsApp.List", function(List, ContactManager, Backbone, Marionette, $, _){
@@ -87,13 +86,6 @@ define(["app"
                     model: newContact
                   });
 
-                  view.on('render', function(){
-                    var genderChooserView = new GCView.GenderChooserView({
-                      model: newContact
-                    });
-                    view.genderChooser.show(genderChooserView);
-                  })
-
                   view.on("form:submit", function(data){
                     if(contacts.length > 0){
                       var highestId = contacts.max(function(c){ return c.id; }).get("id");
@@ -131,12 +123,6 @@ define(["app"
                     model: model
                   });
 
-                  view.on('render', function(){
-                    var genderChooserView = new GCView.GenderChooserView({
-                      model: model
-                    });
-                    view.genderChooser.show(genderChooserView);
-                  })
 
                   view.on("form:submit", function(data){
                     if(model.save(data)){

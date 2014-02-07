@@ -1,5 +1,10 @@
-define(["app", "tpl!apps/contacts/common/templates/form.tpl", "backbone.syphon"],
-       function(ContactManager, formTpl){
+define(["app"
+  , "tpl!apps/contacts/common/templates/form.tpl"
+  , "apps/contacts/common/gender"
+  , "entities/contact"
+  , "backbone.syphon"
+],
+       function(ContactManager, formTpl, GView){
 
   ContactManager.module("ContactsApp.Common.Views", function(Views, ContactManager, Backbone, Marionette, $, _){
     Views.Form = Marionette.Layout.extend({
@@ -10,7 +15,27 @@ define(["app", "tpl!apps/contacts/common/templates/form.tpl", "backbone.syphon"]
       },
 
       regions: {
-        genderChooser: '.genderChooser'
+        genderFirst: ".gender-first",
+        genderSecond: ".gender-second"
+      },
+
+      onShowCalled: function() {
+
+        var manGenderView = new GView.GenderView({
+            model: new ContactManager.Entities.Contact({
+              gender: "M"
+            })
+          })
+          , womanGenderView = new GView.GenderView({
+            model: new ContactManager.Entities.Contact({
+              gender: "F"
+            })
+          })
+          ;
+
+        this.genderFirst.show(manGenderView);
+        this.genderSecond.show(womanGenderView);
+
       },
 
       submitClicked: function(e){
